@@ -41,12 +41,25 @@ with col1:
     internet_service = st.selectbox("Internet Service", ["DSL", "Fiber optic", "No"])
 
 with col2:
-    online_security = st.selectbox("Online Security", ["Yes", "No", "No internet service"])
-    online_backup = st.selectbox("Online Backup", ["Yes", "No", "No internet service"])
-    device_protection = st.selectbox("Device Protection", ["Yes", "No", "No internet service"])
-    tech_support = st.selectbox("Tech Support", ["Yes", "No", "No internet service"])
-    streaming_tv = st.selectbox("Streaming TV", ["Yes", "No", "No internet service"])
-    streaming_movies = st.selectbox("Streaming Movies", ["Yes", "No", "No internet service"])
+    no_internet = internet_service == "No"
+
+    if no_internet:
+        st.selectbox("Online Security", ["No internet service"], disabled=True)
+        st.selectbox("Online Backup", ["No internet service"], disabled=True)
+        st.selectbox("Device Protection", ["No internet service"], disabled=True)
+        st.selectbox("Tech Support", ["No internet service"], disabled=True)
+        st.selectbox("Streaming TV", ["No internet service"], disabled=True)
+        st.selectbox("Streaming Movies", ["No internet service"], disabled=True)
+        online_security = online_backup = device_protection = "No internet service"
+        tech_support = streaming_tv = streaming_movies = "No internet service"
+    else:
+        online_security = st.selectbox("Online Security", ["Yes", "No"])
+        online_backup = st.selectbox("Online Backup", ["Yes", "No"])
+        device_protection = st.selectbox("Device Protection", ["Yes", "No"])
+        tech_support = st.selectbox("Tech Support", ["Yes", "No"])
+        streaming_tv = st.selectbox("Streaming TV", ["Yes", "No"])
+        streaming_movies = st.selectbox("Streaming Movies", ["Yes", "No"])
+
     contract = st.selectbox("Contract", ["Month-to-month", "One year", "Two year"])
     paperless_billing = st.selectbox("Paperless Billing", ["Yes", "No"])
     payment_method = st.selectbox("Payment Method", [
