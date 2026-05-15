@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -100,4 +99,3 @@ if st.button("Prédire le niveau de vente", use_container_width=True, type="prim
 
     st.success(f"**Niveau de vente prédit : {label}**")
     st.caption(description)
-```
