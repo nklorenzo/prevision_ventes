@@ -1,17 +1,15 @@
+```python
 import streamlit as st
 import numpy as np
 import pandas as pd
 import pickle
 import tensorflow as tf
 
-# ── CONFIG PAGE ──────────────────────────────────────────────
 st.set_page_config(
-    page_title="Telecom SalesTier Predictor",
-    page_icon="",
+    page_title="Prédicteur du niveau de vente des services de télécommunication",
     layout="centered"
 )
 
-# ── CHARGEMENT DES ARTEFACTS ─────────────────────────────────
 @st.cache_resource
 def load_artifacts():
     model = tf.keras.models.load_model('model_telecom_keras.keras')
@@ -23,20 +21,19 @@ def load_artifacts():
 
 model, scaler, label_encoders = load_artifacts()
 
-# ── INTERFACE ────────────────────────────────────────────────
-st.title("Telecom SalesTier Predictor")
-st.markdown("Prédiction du **tier de vente** d'un client basé sur ses caractéristiques.")
+st.title("Prédicteur du niveau de vente des services de télécommunication")
+st.markdown("Prédiction du **niveau de vente** d'un client basé sur ses caractéristiques.")
 
 st.divider()
 
-# ── FORMULAIRE ───────────────────────────────────────────────
 st.subheader("Informations client")
 
 col1, col2 = st.columns(2)
 
 with col1:
     gender = st.selectbox("Genre", ["Male", "Female"])
-    senior_citizen = st.selectbox("Senior Citizen", [0, 1])
+    senior_citizen_label = st.selectbox("Senior Citizen", ["Non", "Oui"])
+    senior_citizen = 1 if senior_citizen_label == "Oui" else 0
     partner = st.selectbox("Partner", ["Yes", "No"])
     dependents = st.selectbox("Dependents", ["Yes", "No"])
     tenure = st.slider("Tenure (mois)", 0, 72, 12)
@@ -60,8 +57,7 @@ with col2:
 
 st.divider()
 
-# ── PREDICTION ───────────────────────────────────────────────
-if st.button("Prédire le SalesTier", use_container_width=True, type="primary"):
+if st.button("Prédire le niveau de vente", use_container_width=True, type="primary"):
 
     input_dict = {
         'gender': gender,
@@ -102,5 +98,6 @@ if st.button("Prédire le SalesTier", use_container_width=True, type="primary"):
 
     label, description = labels[predicted_class]
 
-    st.success(f"**SalesTier prédit : {label}**")
+    st.success(f"**Niveau de vente prédit : {label}**")
     st.caption(description)
+```
