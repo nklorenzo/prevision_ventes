@@ -7,7 +7,7 @@ import tensorflow as tf
 # ── CONFIG PAGE ──────────────────────────────────────────────
 st.set_page_config(
     page_title="Telecom SalesTier Predictor",
-    page_icon="📡",
+    page_icon="",
     layout="centered"
 )
 
@@ -24,7 +24,7 @@ def load_artifacts():
 model, scaler, label_encoders = load_artifacts()
 
 # ── INTERFACE ────────────────────────────────────────────────
-st.title("📡 Telecom SalesTier Predictor")
+st.title("Telecom SalesTier Predictor")
 st.markdown("Prédiction du **tier de vente** d'un client basé sur ses caractéristiques.")
 
 st.divider()
@@ -60,10 +60,9 @@ with col2:
 
 st.divider()
 
-# ── PRÉDICTION ───────────────────────────────────────────────
-if st.button("🔍 Prédire le SalesTier", use_container_width=True, type="primary"):
+# ── PREDICTION ───────────────────────────────────────────────
+if st.button("Prédire le SalesTier", use_container_width=True, type="primary"):
 
-    # Construire le DataFrame input
     input_dict = {
         'gender': gender,
         'SeniorCitizen': senior_citizen,
@@ -86,34 +85,22 @@ if st.button("🔍 Prédire le SalesTier", use_container_width=True, type="prima
 
     input_df = pd.DataFrame([input_dict])
 
-    # Appliquer les LabelEncoders
     for col, le in label_encoders.items():
         if col in input_df.columns:
             input_df[col] = le.transform(input_df[col])
 
-    # Normaliser
     input_scaled = scaler.transform(input_df)
 
-    # Prédire
     proba = model.predict(input_scaled)[0]
     predicted_class = np.argmax(proba)
 
     labels = {
-        0: ("🟢 Faible", "MonthlyCharges < 35$"),
-        1: ("🟡 Moyen", "MonthlyCharges entre 35$ et 65$"),
-        2: ("🔴 Élevé", "MonthlyCharges > 65$"),
+        0: ("Faible", "MonthlyCharges < 35$"),
+        1: ("Moyen", "MonthlyCharges entre 35$ et 65$"),
+        2: ("Elevé", "MonthlyCharges > 65$"),
     }
 
     label, description = labels[predicted_class]
 
-    # Affichage résultat
     st.success(f"**SalesTier prédit : {label}**")
     st.caption(description)
-
-    # Afficher les probabilités
-    st.subheader("Probabilités par classe")
-    proba_df = pd.DataFrame({
-        'Tier': ['Faible (0)', 'Moyen (1)', 'Élevé (2)'],
-        'Probabilité': proba
-    })
-    st.bar_chart(proba_df.set_index('Tier'))
