@@ -5,7 +5,7 @@ import pickle
 import tensorflow as tf
 
 st.set_page_config(
-    page_title="Prédicteur du niveau de vente des services de télécommunication",
+    page_title="Prédiction de la catégorie tarifaire d'un client à partir de ses caractéristiques.",
     layout="centered"
 )
 
