@@ -2,81 +2,118 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import pickle
-from tensorflow import keras
+import tensorflow as tf
 
-# Cache du chargement du modÃ¨le (trÃ¨s important en production)
+# ── CONFIG PAGE ──────────────────────────────────────────────
+st.set_page_config(
+    page_title="Telecom SalesTier Predictor",
+    page_icon="📡",
+    layout="centered"
+)
+
+# ── CHARGEMENT DES ARTEFACTS ─────────────────────────────────
 @st.cache_resource
 def load_artifacts():
-    model = keras.models.load_model('model_telecom_keras.h5')
-    
+    model = tf.keras.models.load_model('model_telecom_keras.keras')
     with open('scaler_telecom_keras.pkl', 'rb') as f:
         scaler = pickle.load(f)
-    
     with open('label_encoders_telecom.pkl', 'rb') as f:
         label_encoders = pickle.load(f)
-    
     return model, scaler, label_encoders
 
 model, scaler, label_encoders = load_artifacts()
 
-st.title("ðŸ”® PrÃ©diction des Ventes - Services TÃ©lÃ©com")
-st.subheader("Saisissez les caractÃ©ristiques du client")
+# ── INTERFACE ────────────────────────────────────────────────
+st.title("📡 Telecom SalesTier Predictor")
+st.markdown("Prédiction du **tier de vente** d'un client basé sur ses caractéristiques.")
 
-# ==================== Formulaire ====================
+st.divider()
+
+# ── FORMULAIRE ───────────────────────────────────────────────
+st.subheader("Informations client")
+
 col1, col2 = st.columns(2)
 
 with col1:
-    tenure = st.slider("AnciennetÃ© (mois)", 0, 72, 12)
-    contract = st.selectbox("Type de contrat", 
-                ['Month-to-month', 'One year', 'Two year'])
-    internet = st.selectbox("Service Internet", 
-                ['DSL', 'Fiber optic', 'No'])
-    payment = st.selectbox("MÃ©thode de paiement", 
-                ['Electronic check', 'Mailed check', 'Bank transfer (automatic)', 'Credit card (automatic)'])
+    gender = st.selectbox("Genre", ["Male", "Female"])
+    senior_citizen = st.selectbox("Senior Citizen", [0, 1])
+    partner = st.selectbox("Partner", ["Yes", "No"])
+    dependents = st.selectbox("Dependents", ["Yes", "No"])
+    tenure = st.slider("Tenure (mois)", 0, 72, 12)
+    phone_service = st.selectbox("Phone Service", ["Yes", "No"])
+    multiple_lines = st.selectbox("Multiple Lines", ["Yes", "No", "No phone service"])
+    internet_service = st.selectbox("Internet Service", ["DSL", "Fiber optic", "No"])
 
 with col2:
-    monthly_charges = st.number_input("Montant mensuel ($)", min_value=0.0, value=70.0, step=0.1)
-    total_charges = st.number_input("Montant total ($)", min_value=0.0, value=800.0, step=0.1)
-    senior = st.radio("Client Senior ?", ["Oui", "Non"])
-    partner = st.radio("A un partenaire ?", ["Oui", "Non"])
-    dependents = st.radio("A des personnes Ã  charge ?", ["Oui", "Non"])
+    online_security = st.selectbox("Online Security", ["Yes", "No", "No internet service"])
+    online_backup = st.selectbox("Online Backup", ["Yes", "No", "No internet service"])
+    device_protection = st.selectbox("Device Protection", ["Yes", "No", "No internet service"])
+    tech_support = st.selectbox("Tech Support", ["Yes", "No", "No internet service"])
+    streaming_tv = st.selectbox("Streaming TV", ["Yes", "No", "No internet service"])
+    streaming_movies = st.selectbox("Streaming Movies", ["Yes", "No", "No internet service"])
+    contract = st.selectbox("Contract", ["Month-to-month", "One year", "Two year"])
+    paperless_billing = st.selectbox("Paperless Billing", ["Yes", "No"])
+    payment_method = st.selectbox("Payment Method", [
+        "Electronic check", "Mailed check",
+        "Bank transfer (automatic)", "Credit card (automatic)"
+    ])
 
-if st.button("ðŸš€ PrÃ©dire la catÃ©gorie de vente", type="primary"):
-    # CrÃ©ation du DataFrame
-    input_data = pd.DataFrame([{
-        'tenure': tenure,
-        'Contract': contract,
-        'InternetService': internet,
-        'PaymentMethod': payment,
-        'MonthlyCharges': monthly_charges,
-        'TotalCharges': total_charges,
-        'SeniorCitizen': 1 if senior == "Oui" else 0,
+st.divider()
+
+# ── PRÉDICTION ───────────────────────────────────────────────
+if st.button("🔍 Prédire le SalesTier", use_container_width=True, type="primary"):
+
+    # Construire le DataFrame input
+    input_dict = {
+        'gender': gender,
+        'SeniorCitizen': senior_citizen,
         'Partner': partner,
         'Dependents': dependents,
-        # Ajoute ici toutes les autres features que ton modÃ¨le attend
-    }])
+        'tenure': tenure,
+        'PhoneService': phone_service,
+        'MultipleLines': multiple_lines,
+        'InternetService': internet_service,
+        'OnlineSecurity': online_security,
+        'OnlineBackup': online_backup,
+        'DeviceProtection': device_protection,
+        'TechSupport': tech_support,
+        'StreamingTV': streaming_tv,
+        'StreamingMovies': streaming_movies,
+        'Contract': contract,
+        'PaperlessBilling': paperless_billing,
+        'PaymentMethod': payment_method,
+    }
 
-    # Encodage des variables catÃ©gorielles
+    input_df = pd.DataFrame([input_dict])
+
+    # Appliquer les LabelEncoders
     for col, le in label_encoders.items():
-        if col in input_data.columns:
-            input_data[col] = le.transform(input_data[col].astype(str))
+        if col in input_df.columns:
+            input_df[col] = le.transform(input_df[col])
 
-    # Mise Ã  l'Ã©chelle
-    input_scaled = scaler.transform(input_data)
+    # Normaliser
+    input_scaled = scaler.transform(input_df)
 
-    # PrÃ©diction
-    proba = model.predict(input_scaled, verbose=0)[0]
-    classe = np.argmax(proba)
-    
-    labels = {0: 'Faible', 1: 'Moyen', 2: 'Ã‰levÃ©e'}
-    
-    st.success(f"**CatÃ©gorie prÃ©dite : {labels[classe]}**")
-    
-    # Affichage des probabilitÃ©s
-    st.bar_chart({
-        'Faible': proba[0],
-        'Moyen': proba[1],
-        'Ã‰levÃ©e': proba[2]
+    # Prédire
+    proba = model.predict(input_scaled)[0]
+    predicted_class = np.argmax(proba)
+
+    labels = {
+        0: ("🟢 Faible", "MonthlyCharges < 35$"),
+        1: ("🟡 Moyen", "MonthlyCharges entre 35$ et 65$"),
+        2: ("🔴 Élevé", "MonthlyCharges > 65$"),
+    }
+
+    label, description = labels[predicted_class]
+
+    # Affichage résultat
+    st.success(f"**SalesTier prédit : {label}**")
+    st.caption(description)
+
+    # Afficher les probabilités
+    st.subheader("Probabilités par classe")
+    proba_df = pd.DataFrame({
+        'Tier': ['Faible (0)', 'Moyen (1)', 'Élevé (2)'],
+        'Probabilité': proba
     })
-    
-    st.caption(f"ProbabilitÃ©s : Faible = {proba[0]:.1%} | Moyen = {proba[1]:.1%} | Ã‰levÃ©e = {proba[2]:.1%}")
+    st.bar_chart(proba_df.set_index('Tier'))
