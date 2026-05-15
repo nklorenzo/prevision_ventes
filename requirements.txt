@@ -1,6 +1,5 @@
-tensorflow==2.16.1
-keras==3.4.0
 streamlit
-pandas
-numpy
+tensorflow==2.21.0
 scikit-learn
+numpy
+pandas
