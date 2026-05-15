@@ -37,7 +37,14 @@ with col1:
     dependents = st.selectbox("Dependents", ["Yes", "No"])
     tenure = st.slider("Tenure (mois)", 0, 72, 12)
     phone_service = st.selectbox("Phone Service", ["Yes", "No"])
-    multiple_lines = st.selectbox("Multiple Lines", ["Yes", "No", "No phone service"])
+
+    no_phone = phone_service == "No"
+    if no_phone:
+        st.selectbox("Multiple Lines", ["No phone service"], disabled=True)
+        multiple_lines = "No phone service"
+    else:
+        multiple_lines = st.selectbox("Multiple Lines", ["Yes", "No"])
+
     internet_service = st.selectbox("Internet Service", ["DSL", "Fiber optic", "No"])
 
 with col2:
