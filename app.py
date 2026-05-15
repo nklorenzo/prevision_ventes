@@ -5,7 +5,7 @@ import pickle
 import tensorflow as tf
 
 st.set_page_config(
-    page_title="Prédiction de la catégorie tarifaire d'un client à partir de ses caractéristiques.",
+    page_title="Prédicteur du niveau de vente des services de télécommunication",
     layout="centered"
 )
 
@@ -21,7 +21,7 @@ def load_artifacts():
 model, scaler, label_encoders = load_artifacts()
 
 st.title("Prédicteur du niveau de vente des services de télécommunication")
-st.markdown("Prédiction du **niveau de vente** d'un client basé sur ses caractéristiques.")
+st.markdown("Prédiction de la catégorie tarifaire d'un client à partir de ses caractéristiques.")
 
 st.divider()
 
