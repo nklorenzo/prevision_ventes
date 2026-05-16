@@ -115,7 +115,7 @@ if st.button("Prédire le niveau de vente", use_container_width=True, type="prim
         2: ("Elevé", "MonthlyCharges > 65$"),
     }
 
-    label = labels[predicted_class]
+    label, description = labels[predicted_class]
 
     st.success(f"**Niveau de vente prédit : {label}**")
     
